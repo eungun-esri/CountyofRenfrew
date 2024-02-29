@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Search Widget | Sample | ArcGIS Maps SDK for JavaScript 4.28</title>
+
+<style>
+html,
+body,
+#viewDiv {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#searchDiv {
+    padding: 0;
+    margin: 0;
+    height: 5em;
+    width: 50em;
+    display: block;
+}
+
+#Results {
+    padding: 10px;
+}
+
+#Results table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#Results th, #Results td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#Results th {
+    background-color: #f2f2f2;
+}
+</style>
+
+<link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css" />
+<script src="https://js.arcgis.com/4.28/"></script>
+
+<script>
+require(["esri/widgets/Search", "esri/rest/support/AddressCandidate"], (Search, AddressCandidate) => {
+
+    const searchWidget = new Search({
+        container: document.getElementById("searchDiv")
+    });
+
+    // Listen for the search-complete event
+    searchWidget.on("search-complete", function(event) {
+        displaySearchResults(event.results);
+    });
+
+    function displaySearchResults(results) {
+        const resultsDiv = document.getElementById("Results");
+        resultsDiv.innerHTML = ""; // Clear previous results
+        
+        // Sort results by score in descending order
+        results.sort((a, b) => b.score - a.score);
+        
+        // Create a table
+        const table = document.createElement("table");
+        
+        // Create table headers
+        const headers = ["Address", "Address Type", "Score"];
+        const headerRow = document.createElement("tr");
+        headers.forEach(headerText => {
+            const header = document.createElement("th");
+            header.textContent = headerText;
+            headerRow.appendChild(header);
+        });
+        table.appendChild(headerRow);
+
+        // Populate table with search results
+        results.forEach(result => {
+            const row = document.createElement("tr");
+            const addressCell = document.createElement("td");
+			const typeCell = document.createElement("td")
+            const scoreCell = document.createElement("td");		
+            // Ensure the attribute names are correct
+            addressCell.textContent = result.results[0].feature.attributes.Match_addr;
+			typeCell.textContent = result.results[0].feature.attributes.Addr_type;
+            scoreCell.textContent = result.results[0].score;
+            row.appendChild(addressCell);
+			row.appendChild(typeCell);
+			row.appendChild(scoreCell);
+            table.appendChild(row);
+        });
+
+        // Append the table to the Results div
+        resultsDiv.appendChild(table);
+    }
+
+});
+</script>
+</head>
+
+<body>
+<div id="searchDiv"></div>
+<div id="Results"></div>
+</body>
+</html>
